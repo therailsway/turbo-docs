@@ -1,4 +1,4 @@
-= Decompose with Turbo Frames
+= 用 Turbo Frames 分解页面
 :description: Turbo Frames decompose pages into independent contexts, which can be lazy-loaded and scope interaction.
 :permalink: /handbook/frames.html
 

@@ -1,35 +1,35 @@
-= Introduction
+= 概述
 :description: Turbo bundles several techniques for creating fast, modern web applications without having to reach for a client-side JavaScript framework.
 :permalink: /handbook/introduction.html
 :redirect_from: /handbook/
 
-Turbo bundles several techniques for creating fast, modern, progressively enhanced web applications without using much JavaScript. It offers a simpler alternative to the prevailing client-side frameworks which put all the logic in the front-end and confine the server side of your app to being little more than a JSON API.
+Turbo 是一套技术组合，使用该套技术组合，不需要使用大量 JavaScript代码就可以创建快速、现代、逐步增强的 Web 应用程序。它为流行的客户端框架（将所有逻辑放在前端，将应用程序的服务端限制为仅提供 JSON API）提供了一个更简单的替代方案。
 
-With Turbo, you let the server deliver HTML directly, which means all the logic for checking permissions, interacting directly with your domain model, and everything else that goes into programming an application can happen more or less exclusively within your favorite programming language. You're no longer mirroring logic on both sides of a JSON divide. All the logic lives on the server, and the browser deals just with the final HTML.
+使用 Turbo，您可以让服务器直接交付 HTML，这意味着检查权限、直接与您的域模型交互的所有逻辑以及进入应用程序编程的所有事情都可以用您最喜欢的编程语言处理。您不再需要为 JSON 两端的逻辑操心，所有的逻辑都在服务器上，浏览器只处理最终的 HTML。
 
-You can read more about the benefits of this HTML-over-the-wire approach on the https://hotwired.dev/[Hotwire site]. What follows are the techniques that Turbo brings to make this possible.
+您可以在 https://hotwired.dev/[Hotwire 站点]查看更多有关  HTML-over-the-wire 带来的好处。下面就是 Turbo 使其变为可能的相关技术。
 
-== Turbo Drive: Navigate within a persistent process
+== Turbo Drive：在一个持续的过程中导航
 
-A key attraction with traditional single-page applications, when compared with the old-school, separate-pages approach, is the speed of navigation. SPAs get a lot of that speed from not constantly tearing down the application process, only to reinitialize it on the very next page.
+与传统的分页应用相比，经典的单页应用（SPA）最吸引人的关键就是导航速度。SPA 的速度得益于其不会关闭应用处理过程，而是对下一个页面进行重新初始化。
 
-Turbo Drive gives you that same speed by using the same persistent-process model, but without requiring you to craft your entire application around the paradigm. There's no client-side router to maintain, there's no state to carefully manage. The persistent process is managed by Turbo, and you write your server-side code as though you were living back in the early aughts -- blissfully isolated from the complexities of today's SPA monstrosities!
+Turbo Drive 通过使用相同的持久进程模型使您具有供相同的速度，但不需要您围绕该模型来重构整个应用程序。无需维护客户端路由，无需注意管理状态。持久化进程由 Turbo 管理，您只需像早期的编程一样编写服务器端代码----无视当今复杂的 SPA 怪物！
 
-This happens by intercepting all clicks on `<a href>` links to the same domain. When you click an eligible link, Turbo Drive prevents the browser from following it, changes the browser's URL using the https://developer.mozilla.org/en-US/docs/Web/API/History[History API], requests the new page using https://developer.mozilla.org/en-US/docs/Web/API/fetch[`fetch`], and then renders the HTML response.
+这是通过拦截同域下的所有点击 `<a href>` 链接来实现的。当您单击符合条件的链接时，Turbo Drive 会阻止浏览器跟踪它，使用 https://developer.mozilla.org/en-US/docs/Web/API/History[History API] 更改浏览器的 URL，使用 https://developer.mozilla.org/en-US/docs/Web/API/fetch[`fetch`] 请求新页面，然后呈现 HTML 响应。
 
-Same deal with forms. Their submissions are turned into `fetch` requests from which Turbo Drive will follow the redirect and render the HTML response.
+表单也是一样。他们的提交被转换为 `fetch` 请求，Turbo Drive 将根据重定向导向呈现 HTML 响应。
 
-During rendering, Turbo Drive replaces the current `<body>` element outright and merges the contents of the `<head>` element. The JavaScript window and document objects, and the `<html>` element, persist from one rendering to the next.
+在渲染过程中，Turbo Drive 直接替换当前的 `<body>` 元素并合并 `<head>` 元素的内容。而 JavaScript 窗口和文档对象，以及 `<html>` 元素，会从一个呈现到下一个呈现持续存在。
 
-While it's possible to interact directly with Turbo Drive to control how visits happen or hook into the lifecycle of the request, the majority of the time this is a drop-in replacement where the speed is free just by adopting a few conventions.
+尽管 Turbo Drive 可以直接拦截控制访问或参与请求（Request）的生命周期，但大多数情况下，这只是一种只需采用一些约定即可获得速度的替代方法。
 
-== Turbo Frames: Decompose complex pages
+== Turbo Frames：解构复杂页面
 
-Most web applications present pages that contain several independent segments. For a discussion page, you might have a navigation bar on the top, a list of messages in the center, a form at the bottom to add a new message, and a sidebar with related topics. Generating this discussion page normally means generating each segment in a serialized manner, piecing them all together, then delivering the result as a single HTML response to the browser.
+大多数 Web 应用程序呈现的都是包含多个独立部分的页面。对于一个讨论页面，您可能在顶部有一个导航栏，在中间是一个消息列表，在底部有一个用于添加新消息的表单，以及一个包含相关主题的侧边栏。生成这个讨论页面通常意味着以序列化的方式生成每个部分，然后将它们拼凑在一起，最终将单个 HTML 响应传递给浏览器。
 
-With Turbo Frames, you can place those independent segments inside frame elements that can scope their navigation and be lazily loaded. Scoped navigation means all interaction within a frame, like clicking links or submitting forms, happens within that frame, keeping the rest of the page from changing or reloading.
+使用 Turbo Frames，您可以将这些独立部分放在局部（Scope）导航和延迟加载的 Frame 元素内。局部导航意味着所有的操作在一个 Frame 内，像点击链接或者提交表单都只在该 Frame 内，以防页面的其他部分的更改或加载。
 
-To wrap an independent segment in its own navigation context, enclose it in a `<turbo-frame>` tag. For example:
+使用 `<turbo-frame>` 标签在其自己的导航上下文内包裹一个独立的部分。例如：
 
 [,html]
 ----
@@ -40,9 +40,9 @@ To wrap an independent segment in its own navigation context, enclose it in a `<
 </turbo-frame>
 ----
 
-When you submit the form above, Turbo extracts the matching `<turbo-frame id="new_message">` element from the redirected HTML response and swaps its content into the existing `new_message` frame element. The rest of the page stays just as it was.
+当你提交上面的表单后，Turbo 会从重定向的 HTML 响应中获取信息然后置换掉匹配的 `<turbo-frame id="new_message">` 元素内容，而页面其他内容保持不变。
 
-Frames can also defer loading their contents in addition to scoping navigation. To defer loading a frame, add a `src` attribute whose value is the URL to be automatically loaded. As with scoped navigation, Turbo finds and extracts the matching frame from the resulting response and swaps its content into place:
+除了局部（Scope）导航之外，Frame 还可以延迟加载内容。要延迟加载，需要添加一个值为要自动加载的 URL 的 `src` 属性，与局部导航一样，Turbo 从结果响应中查找并提取内容置换到匹配的 Frame：
 
 [,html]
 ----
@@ -51,19 +51,19 @@ Frames can also defer loading their contents in addition to scoping navigation. 
 </turbo-frame>
 ----
 
-This may sound a lot like old-school frames, or even ``<iframe>``s, but Turbo Frames are part of the same DOM, so there's none of the weirdness or compromises associated with "real" frames. Turbo Frames are styled by the same CSS, part of the same JavaScript context, and are not placed under any additional content security restrictions.
+这看上去很像传统的 Frame，或者更像 `<iframe>`，毕竟 Turbo Frames 就是 DOM 的一部分，所以这与实际的 Frame 相比也没有什么不一样。Turbo Frames 也使用 CSS 美化，也是 JavaScript 上下文关联的部分，并且不受任何额外的内容安全限制。
 
-In addition to turning your segments into independent contexts, Turbo Frames affords you:
+除了将您的页面转换为独立的上下文之外，Turbo Frames 还为您提供：
 
-. *Efficient caching.* In the discussion page example above, the related topics sidebar needs to expire whenever a new related topic appears, but the list of messages in the center does not. When everything is just one page, the whole cache expires as soon as any of the individual segments do. With frames, each segment is cached independently, so you get longer-lived caches with fewer dependent keys.
-. *Parallelized execution.* Each defer-loaded frame is generated by its own HTTP request/response, which means it can be handled by a separate process. This allows for parallelized execution without having to manually manage the process. A complicated composite page that takes 400ms to complete end-to-end can be broken up with frames where the initial request might only take 50ms, and each of three defer-loaded frames each take 50ms. Now the whole page is done in 100ms because the three frames each taking 50ms run concurrently rather than sequentially.
-. *Ready for mobile.* In mobile apps, you usually can't have big, complicated composite pages. Each segment needs a dedicated screen. With an application built using Turbo Frames, you've already done this work of turning the composite page into segments. These segments can then appear in native sheets and screens without alteration (since they all have independent URLs).
+. *高效缓存。* 在上面的讨论页面示例中，每当出现新的相关主题时，相关主题侧边栏都需要缓存过期而获取新内容，但中心的消息列表不应该缓存过期。当所有信息都在一页时，整个缓存会在任何单独的内容片段到期时全部过期从而需要重新获取全部内容。使用 Frames，每个内容片段都被独立缓存，因此您可以因为有更少依赖键从而对整个页面而言具有更长时间的缓存。
+. *并行运算。* 每个延迟加载的 Frame 都是由其自己的 HTTP 请求/响应生成的，这意味着它可以由单独的进程处理。这就是允许并行运算，而无需手动管理进程。一个需要 400 毫秒才能完成端到端的复杂复合页面可以分解为初始请求可能只需要 50 毫秒的 Frame，而三个延迟加载的 Frame 中的每一个都需要 50 毫秒。现在整个页面在 100 毫秒内完成，因为每个需要 50 毫秒的三个帧同时运行而不是顺序运行。
+. *面向移动设备。* 在移动应用程序中，您通常不能使用大而复杂的复合页面。每个局部片段都需要一个专用屏幕。通过使用 Turbo Frames 构建的应用程序，您已经完成了将复合页面转换为局部片段的工作。然后，这些片段可以不加更改地出现在原生设备和屏幕上（因为它们都有独立的 URL）。
 
-== Turbo Streams: Deliver live page changes
+== Turbo Streams: 实时更新页面
 
-Making partial page changes in response to asynchronous actions is how we make the application feel alive. While Turbo Frames give us such updates in response to direct interactions within a single frame, Turbo Streams let us change any part of the page in response to updates sent over a WebSocket connection, SSE or other transport. (Think an http://itsnotatypo.com[imbox] that automatically updates when a new email arrives.)
+我们使应用程序感觉实时更新的方式就是通过异步操作来响应局部页面更新。Turbo Frames 提供响应单个 Frame 内的直接交互操作更新，而 Turbo Streams 允许我们更改页面的任何部分并通过 WebSocket 连接、SSE 或其他传输发送更新响应。（想想当新电子邮件到达时自动更新的http://itsnotatypo.com[收件箱]。）
 
-Turbo Streams introduces a `<turbo-stream>` element with seven basic actions: `append`, `prepend`, `replace`, `update`, `remove`, `before`, and `after`. With these actions, along with the `target` attribute specifying the ID of the element you want to operate on, you can encode all the mutations needed to refresh the page. You can even combine several stream elements in a single stream message. Simply include the HTML you're interested in inserting or replacing in a https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template[template tag] and Turbo does the rest:
+Turbo Streams 引入了具有七个基本操作的 `<turbo-stream>` 元素：`append`、`prepend`、`replace`、`update`、`remove`、``before``和``after``。使用这些操作，连同``target``属性指定您想要操作的元素 ID，甚至您可以在一个 Stream 信息中联合使用多个 Steam 元素，只需在 https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template[template 标签]中包含您有兴趣插入或替换的 HTML，Turbo 会完成其余的工作：
 
 [,html]
 ----
@@ -74,7 +74,7 @@ Turbo Streams introduces a `<turbo-stream>` element with seven basic actions: `a
 </turbo-stream>
 ----
 
-This stream element will take the `div` with the new message and append it to the container with the ID `messages`. It's just as simple to replace an existing element:
+这段 stream 元素会将 `div` 标签以及新信息追加到 ID 为 `messages` 的容器标签内。这同替换一个存在的元素一样简单：
 
 [,html]
 ----
@@ -85,26 +85,26 @@ This stream element will take the `div` with the new message and append it to th
 </turbo-stream>
 ----
 
-This is a conceptual continuation of what in the Rails world was first called https://weblog.rubyonrails.org/2006/3/28/rails-1-1-rjs-active-record-respond_to-integration-tests-and-500-other-things/[RJS] and then called https://signalvnoise.com/posts/3697-server-generated-javascript-responses[SJR], but realized without any need for JavaScript. The benefits remain the same:
+这是 Rails 世界中最初称为 https://weblog.rubyonrails.org/2006/3/28/rails-1-1-rjs-active-record-respond_to-integration-tests-and-500-other-things/[RJS] 然后称为 https://signalvnoise.com/posts/3697-server-generated-javascript-responses[SJR] 的概念延续，无需任何 JavaScript 即可实现。好处依旧不变：
 
-. *Reuse the server-side templates*: Live page changes are generated using the same server-side templates that were used to create the first-load page.
-. *HTML over the wire*: Since all we're sending is HTML, you don't need any client-side JavaScript (beyond Turbo, of course) to process the update. Yes, the HTML payload might be a tad larger than a comparable JSON, but with gzip, the difference is usually negligible, and you save all the client-side effort it takes to fetch JSON and turn it into HTML.
-. *Simpler control flow*: It's really clear to follow what happens when messages arrive on the WebSocket, SSE or in response to form submissions. There's no routing, event bubbling, or other indirection required. It's just the HTML to be changed, wrapped in a single tag that tells us how.
+. *服务端模板复用*: 使用与创建首次加载页面相同的服务端模板生成实时页面更新。
+. *网络 HTML 至上*: （ HTML over the wire）由于我们发送的只是 HTML，因此您不需要任何客户端 JavaScript（当然 Turbo 除外）来处理更新。是的，HTML 有效负载可能比类似的 JSON 大一点，但是使用 gzip，差异通常可以忽略不计，并且您节省了获取 JSON 并将其转换为 HTML 所需的所有客户端工作。
+. *简化控制流*: 当消息通过 WebSocket、SSE 或表单提交的响应到达时，我们很清楚会发生什么。不需要路由、事件冒泡或其他间接方式，它只是包裹在一个简单标签内的需要更改的一段 HTML。
 
-Now, unlike RJS and SJR, it's not possible to call custom JavaScript functions as part of a Turbo Streams action. But this is a feature, not a bug. Those techniques can easily end up producing a tangled mess when way too much JavaScript is sent along with the response. Turbo focuses squarely on just updating the DOM, and then assumes you'll connect any additional behavior using https://stimulus.hotwired.dev[Stimulus] actions and lifecycle callbacks.
+现在，与 RJS 和 SJR 不同，不能将调用自定义 JavaScript 函数作为 Turbo Streams 操作的一部分。但这是一个功能，而不是一个错误。当与响应一起发送的 JavaScript 太多时，这些技术很容易最终导致混乱。Turbo 仅专注于更新 DOM，如果您需要联通其他行为可使用 https://stimulus.hotwired.dev[Stimulus] 操作和调用生命周期。
 
-== Turbo Native: Hybrid apps for iOS & Android
+== Turbo Native: 适用于 iOS 和 Android 的混合应用程序
 
-Turbo Native is ideal for building hybrid apps for iOS and Android. You can use your existing server-rendered HTML to get baseline coverage of your app's functionality in a native wrapper. Then you can spend all the time you saved on making the few screens that really benefit from high-fidelity native controls even better.
+Turbo Native 是为 iOS 和 Android 构建混合应用程序的理想选择。您可以使用现有的服务器呈现的 HTML 基础上利用 Native 包装器对应用程序功能进行基本包装。然后，您可以将节省的所有时间花在真正受益于高保真原生控件的少数屏幕上。
 
-An application like Basecamp has hundreds of screens. Rewriting every single one of those screens would be an enormous task with very little benefit. Better to reserve the native firepower for high-touch interactions that really demand the highest fidelity. Something like the "New For You" inbox in Basecamp, for example, where we use swipe controls that need to feel just right. But most pages, like the one showing a single message, wouldn't really be any better if they were completely native.
+像 Basecamp 这样的应用程序有数百个屏幕。重写这些屏幕中的每一个将是一项艰巨的任务，却可能收效甚微。最好为真正需要最高保真度的高接触交互保留原生火力。例如，Basecamp 中的"`New For You`"收件箱之类的东西，我们会使用需要感觉恰到好处的滑动控件。但是大多数页面，比如显示一条消息的页面，如果它们完全是原生的，也不一定会更好。
 
-Going hybrid doesn't just speed up your development process, it also gives you more freedom to upgrade your app without going through the slow and onerous app store release processes. Anything that's done in HTML can be changed in your web application, and instantly be available to all users. No waiting for Big Tech to approve your changes, no waiting for users to upgrade.
+混合编程不仅可以加快您的开发过程，还可以让您更自由地升级您的应用程序，而无需经历缓慢而繁重的应用程序商店发布过程。在 HTML 中完成的任何事情都可以在您的 Web 应用程序中进行更改，并且立即可供所有用户使用。无需等待大拿批准您的更改，无需等待用户升级。
 
-Turbo Native assumes you're using the recommended development practices available for iOS and Android. This is not a framework that abstracts native APIs away or even tries to let your native code be shareable between platforms. The part that's shareable is the HTML that's rendered server-side. But the native controls are written in the recommended native APIs.
+Turbo Native 假设您正在使用适用于 iOS 和 Android 的推荐开发实践。这不是一个抽象原生 API 甚至试图让你的原生代码在平台之间共享的框架。可共享的部分是在服务器端呈现的 HTML。但是本机控件是用推荐的本机 API 编写的。
 
-See the https://github.com/hotwired/turbo-ios[Turbo Native: iOS] and https://github.com/hotwired/turbo-android[Turbo Native: Android] repositories for more documentation. See the native apps for HEY on https://apps.apple.com/us/app/hey-email/id1506603805[iOS] and https://play.google.com/store/apps/details?id=com.basecamp.hey&hl=en_US&gl=US[Android] to get a feel for just how good you can make a hybrid app powered by Turbo.
+更多说明查阅 https://github.com/hotwired/turbo-ios[Turbo Native: iOS] 和 https://github.com/hotwired/turbo-android[Turbo Native: Android] 代码库。查看 HEY 在 https://apps.apple.com/us/app/hey-email/id1506603805[iOS] 和 https://play.google.com/store/apps/details?id=com.basecamp.hey&hl=en_US&gl=US[Android] 的 Native App 来感受一下利用 Turbo 编写的混合应用有多帅。
 
-== Integrate with backend frameworks
+== 与后端框架集成
 
-You don't need any backend framework to use Turbo. All the features are built to be used directly, without further abstractions. But if you have the opportunity to use a backend framework that's integrated with Turbo, you'll find life a lot simpler. https://github.com/hotwired/turbo-rails[We've created a reference implementation for such an integration for Ruby on Rails].
+您不需要任何后端框架即可使用 Turbo。所有的功能都是为了直接使用而构建的，没有进一步的抽象。但是，如果您有机会使用与 Turbo 集成的后端框架，您会发现生活要简单得多。https://github.com/hotwired/turbo-rails[我们已经为 Ruby on Rails 的这种集成创建了一个参考实现]。

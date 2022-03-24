@@ -1,4 +1,4 @@
-= Building Your Turbo Application
+= 构建您的 Turbo 应用程序
 :description: Learn more about building an application with Turbo.
 :permalink: /handbook/building.html
 

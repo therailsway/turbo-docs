@@ -1,4 +1,4 @@
-= Installing Turbo in Your Application
+= 在应用程序中安装 Turbo
 :description: Learn how to install Turbo in your application.
 :permalink: /handbook/installing.html
 
@@ -17,6 +17,6 @@ You can install Turbo from npm via the `npm` or `yarn` packaging tools. Then req
 import * as Turbo from "@hotwired/turbo"
 ----
 
-== In a Ruby on Rails application
+== 在一个 Ruby on Rails 应用程序中
 
-The Turbo JavaScript framework is included with https://github.com/hotwired/turbo-rails[the turbo-rails gem] for direct use with the asset pipeline.
+Turbo JavaScript 框架已经用 https://github.com/hotwired/turbo-rails[turbo-rails Gem] 打包直接用于 Asset Pipeline 了。

@@ -1,70 +1,70 @@
-= Navigate with Turbo Drive
+= 用 Turbo Drive 导航
 :description: Turbo Drive accelerates links and form submissions by negating the need for full page reloads.
 :permalink: /handbook/drive.html
 
-Turbo Drive is the part of Turbo that enhances page-level navigation. It watches for link clicks and form submissions, performs them in the background, and updates the page without doing a full reload. It's the evolution of a library previously known as https://github.com/turbolinks/turbolinks[Turbolinks].
+Turbo Drive 是 Turbo 的页面级导航增强部分。它会监控页面的链接点击和表单提交，一旦捕获会在后端执行并且进行部分页面更新。它其实是以前的 https://github.com/turbolinks/turbolinks[Turbolinks] 的一个升级。
 
 $\{toc}
 
-== Page Navigation Basics
+== 页面导航基础
 
-Turbo Drive models page navigation as a _visit_ to a _location_ (URL) with an _action_.
+Turbo Drive 将页面导航建模为用__操作（action）__来__访问（visit）__一个__位置（location）__（URL）。
 
-Visits represent the entire navigation lifecycle from click to render. That includes changing browser history, issuing the network request, restoring a copy of the page from cache, rendering the final response, and updating the scroll position.
+访问代表从点击到呈现的整个导航生命周期----包括更改浏览器历史记录、发出网络请求、从缓存中恢复页面副本、呈现最终响应以及更新滚动位置。
 
-There are two types of visit: an _application visit_, which has an action of _advance_ or _replace_, and a _restoration visit_, which has an action of _restore_.
+访问有两种类型：具有 advance 或 replace 操作的 _应用访问_ 和具有 restore 操作的 _恢复访问_。
 
-== Application Visits
+== 应用访问
 
-Application visits are initiated by clicking a Turbo Drive-enabled link, or programmatically by calling link:/reference/drive#turbodrivevisit[`Turbo.visit(location)`].
+应用访问通过点击启用 Turbo Drive 的链接或者通过编程调用 link:/reference/drive#turbodrivevisit[`Turbo.visit(location)`] 发起。
 
-An application visit always issues a network request. When the response arrives, Turbo Drive renders its HTML and completes the visit.
+应用访问总是会先发起一个网络请求，当响应到达的时候，Turbo Drive 会呈现其 HTML 并完成访问。
 
-If possible, Turbo Drive will render a preview of the page from cache immediately after the visit starts. This improves the perceived speed of frequent navigation between the same pages.
+如果可能，Turbo Drive 会在访问开始后立即从缓存中呈现页面预览。这会明显提高访问高频导航的相同页面的感知速度。
 
-If the visit's location includes an anchor, Turbo Drive will attempt to scroll to the anchored element. Otherwise, it will scroll to the top of the page.
+如果访问的位置包含锚点，Turbo Drive 将尝试滚动到锚定元素。否则，它将滚动到页面顶部。
 
-Application visits result in a change to the browser's history; the visit's _action_ determines how.
+应用访问会导致浏览器历史记录发生变化；访问的 _操作_ 决定了访问方式。
 
-image::https://s3.amazonaws.com/turbolinks-docs/images/advance.svg[Advance visit action]
+image::https://s3.amazonaws.com/turbolinks-docs/images/advance.svg[advance 访问操作]
 
-The default visit action is _advance_. During an advance visit, Turbo Drives pushes a new entry onto the browser's history stack using https://developer.mozilla.org/en-US/docs/Web/API/History/pushState[`history.pushState`].
+默认的访问操作是 _advance_。在 advance 操作期间，Turbo Drive 用 https://developer.mozilla.org/en-US/docs/Web/API/History/pushState[`history.pushState`] 将新条目推送到浏览器的历史堆栈中。
 
-Applications using the Turbo Drive https://github.com/hotwired/turbo-ios[iOS adapter] typically handle advance visits by pushing a new view controller onto the navigation stack. Similarly, applications using the https://github.com/hotwired/turbo-android[Android adapter] typically push a new activity onto the back stack.
+使用 Turbo Drive https://github.com/hotwired/turbo-ios[iOS 适配器]的应用程序通常通过将新的视图控制器推送到导航堆栈来处理 advance 访问。类似地，使用 https://github.com/hotwired/turbo-android[Android 适配器]的应用程序通常会将新活动推送到后台堆栈。
 
-image::https://s3.amazonaws.com/turbolinks-docs/images/replace.svg[Replace visit action]
+image::https://s3.amazonaws.com/turbolinks-docs/images/replace.svg[Replace 访问操作]
 
-You may wish to visit a location without pushing a new history entry onto the stack. The _replace_ visit action uses https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState[`history.replaceState`] to discard the topmost history entry and replace it with the new location.
+您可能希望访问一个位置而不将新的历史条目推入堆栈。_replace_ 访问操作使用 https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState[`history.replaceState`] 丢弃最顶层的历史条目并将其替换为新位置。
 
-To specify that following a link should trigger a replace visit, annotate the link with `data-turbo-action="replace"`:
+要指定跟随链接应触发 replace 访问，请使用 `data-turbo-action="replace"` 注释链接：
 
 [,html]
 ----
 <a href="/edit" data-turbo-action="replace">Edit</a>
 ----
 
-To programmatically visit a location with the replace action, pass the `action: "replace"` option to `Turbo.visit`:
+要以编程方式使用 replace 操作访问位置，请将 `action: "replace"` 选项传递给 `Turbo.visit`：
 
 [,js]
 ----
 Turbo.visit("/edit", { action: "replace" })
 ----
 
-Applications using the Turbo Drive https://github.com/hotwired/turbo-ios[iOS adapter] typically handle replace visits by dismissing the topmost view controller and pushing a new view controller onto the navigation stack without animation.
+使用 Turbo Drive 的 https://github.com/hotwired/turbo-ios[iOS 适配器]的应用程序通常通过关闭最顶层的视图控制器并将新的视图控制器推送到导航堆栈上而不带动画来处理 replace 访问。
 
-== Restoration Visits
+== 恢复访问
 
-Turbo Drive automatically initiates a restoration visit when you navigate with the browser's Back or Forward buttons. Applications using the https://github.com/hotwired/turbo-ios[iOS] or https://github.com/hotwired/turbo-android[Android] adapters initiate a restoration visit when moving backward in the navigation stack.
+当您使用浏览器的后退或前进按钮导航时，Turbo Drive 会自动启动恢复访问。使用 https://github.com/hotwired/turbo-ios[iOS] 或 https://github.com/hotwired/turbo-android[Android] 适配器的应用程序在导航堆栈中向后移动时会启动恢复访问。
 
 image::https://s3.amazonaws.com/turbolinks-docs/images/restore.svg[Restore visit action]
 
-If possible, Turbo Drive will render a copy of the page from cache without making a request. Otherwise, it will retrieve a fresh copy of the page over the network. See link:/handbook/building#understanding-caching[Understanding Caching] for more details.
+如果可能，Turbo Drive 将在不发出请求的情况下从缓存中呈现页面的副本。否则，它将通过网络检索页面的新副本。有关更多详细信息，请参阅link:/handbook/building#understanding-caching[了解缓存]。
 
-Turbo Drive saves the scroll position of each page before navigating away and automatically returns to this saved position on restoration visits.
+Turbo Drive 在导航离开之前保存每个页面的滚轮位置，并在恢复访问时自动返回到此保存的位置。
 
-Restoration visits have an action of _restore_ and Turbo Drive reserves them for internal use. You should not attempt to annotate links or invoke `Turbo.visit` with an action of `restore`.
+恢复访问具有 _restore_ 操作，Turbo Drive 保留它们以供内部使用。您不应尝试使用 `restore` 操作来注释链接或调用 Turbo.visit。
 
-== Canceling Visits Before They Start
+== 早于开始的取消操作
 
 Application visits can be canceled before they start, regardless of whether they were initiated by a link click or a call to link:/reference/drive#turbovisit[`Turbo.visit`].
 

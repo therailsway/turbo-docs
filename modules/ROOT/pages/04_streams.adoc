@@ -1,4 +1,4 @@
-= Come Alive with Turbo Streams
+= 用 Turbo Streams 实时更新页面
 :description: Turbo Streams deliver page changes over WebSocket, SSE or in response to form submissions using just HTML and a set of CRUD-like actions.
 :permalink: /handbook/streams.html
 

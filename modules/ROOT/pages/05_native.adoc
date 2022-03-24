@@ -1,4 +1,4 @@
-= Go Native on iOS & Android
+= 在 iOS 和 Android 上用 Native
 :description: Turbo Native lets your majestic monolith form the center of your native iOS and Android apps, with seamless transitions between web and native sections.
 :permalink: /handbook/native.html
 
