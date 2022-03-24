@@ -1,7 +1,7 @@
 name: turbo
-title: Turbo 文档
+title: Turbo
 version: ~
-start_page: ROOT:01_introduction.adoc
+start_page: 01_introduction.adoc
 nav:
 - modules/ROOT/nav.adoc
 - modules/reference/nav.adoc
