@@ -1,6 +1,7 @@
-name: turbo-docs
+name: turbo
 title: Turbo 文档
 version: ~
+start_page: ROOT:01_introduction.adoc
 nav:
 - modules/ROOT/nav.adoc
 - modules/reference/nav.adoc
